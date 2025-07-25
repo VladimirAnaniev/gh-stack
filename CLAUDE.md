@@ -1,7 +1,7 @@
 # Claude Code Project Configuration
 
 ## Project Overview
-`stacked-gh` is a CLI tool for managing stacked Pull Request workflows on GitHub. It aims to simplify:
+`gh-stacked` is a CLI tool for managing stacked Pull Request workflows on GitHub. It aims to simplify:
 - Creating dependent PRs that build on each other
 - Cascading rebases when base branches change  
 - Visualizing PR dependency trees
@@ -108,7 +108,7 @@ gh stacked merge [--auto-cascade]
 **Rationale**:
 - **Target audience alignment** - Developers using stacked PRs likely already use `gh` CLI
 - **Authentication solved** - Inherits `gh auth` automatically, biggest friction eliminated  
-- **Natural workflow** - `gh stacked push` feels more intuitive than `stacked-gh push`
+- **Natural workflow** - `gh stacked push` feels more intuitive than `gh-stacked push`
 - **GitHub-first design** - Tool is GitHub-specific anyway
 - **Faster MVP** - Focus on core logic instead of auth plumbing
 - **Built-in GitHub integration** - Repository detection, environment setup included

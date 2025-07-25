@@ -75,11 +75,11 @@ No stacked PRs found.
 ### 1. Git Log Discovery
 ```bash
 # Single command to find all stacked commits
-git log --all --grep="stacked-gh:" --format="%H %s %D"
+git log --all --grep="gh-stacked:" --format="%H %s %D"
 
 # Returns:
-# abc123 feat: add auth stacked-gh: pr=123 (origin/feature-auth, feature-auth)
-# def456 test: auth tests stacked-gh: pr=124 parent-pr=123 (origin/feature-auth-tests)
+# abc123 feat: add auth gh-stacked: pr=123 (origin/feature-auth, feature-auth)
+# def456 test: auth tests gh-stacked: pr=124 parent-pr=123 (origin/feature-auth-tests)
 ```
 
 ### 2. Metadata Parsing
@@ -93,8 +93,8 @@ type StackMetadata struct {
 }
 
 // Example parsing:
-"stacked-gh: pr=124 parent-pr=123" → {PR: 124, ParentPR: &123}
-"stacked-gh: pr=123"               → {PR: 123, ParentPR: nil}
+"gh-stacked: pr=124 parent-pr=123" → {PR: 124, ParentPR: &123}
+"gh-stacked: pr=123"               → {PR: 123, ParentPR: nil}
 ```
 
 ### 3. GitHub PR Resolution
@@ -161,23 +161,23 @@ main                           # Root (always main/master)
 
 ### Basic Discovery
 ```bash
-git log --all --grep="stacked-gh:" --format="%H %s %D"
+git log --all --grep="gh-stacked:" --format="%H %s %D"
 ```
 
 ### Performance Optimization (if needed)
 ```bash
 # Add time limit if repositories become large
-git log --all --grep="stacked-gh:" --since="60 days ago" --format="%H %s %D"
+git log --all --grep="gh-stacked:" --since="60 days ago" --format="%H %s %D"
 ```
 
 ### Parsing Output
 ```bash
 # Example output line:
-abc123 feat: add authentication stacked-gh: pr=123 (origin/feature-auth, feature-auth)
+abc123 feat: add authentication gh-stacked: pr=123 (origin/feature-auth, feature-auth)
 
 # Extract:
 # - Commit hash: abc123
-# - Message with metadata: "feat: add authentication stacked-gh: pr=123"
+# - Message with metadata: "feat: add authentication gh-stacked: pr=123"
 # - Branch refs: origin/feature-auth, feature-auth
 ```
 

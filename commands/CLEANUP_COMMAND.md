@@ -111,7 +111,7 @@ Clean up dependent branches first, or use 'gh stacked rebase' to restructure.
 ### 1. Reuse Status Discovery
 ```bash
 # Use same git log discovery as status command
-git log --all --grep="stacked-gh:" --format="%H %s %D"
+git log --all --grep="gh-stacked:" --format="%H %s %D"
 
 # Parse metadata to build dependency tree
 # Query GitHub API for PR states

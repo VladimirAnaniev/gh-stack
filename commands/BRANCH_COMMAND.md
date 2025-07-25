@@ -106,7 +106,7 @@ When `gh stacked push` runs, it will determine parent relationships using:
 ### Git History Analysis
 1. **Find branch point**: Use `git merge-base` to find where current branch diverged
 2. **Identify parent branch**: Determine which branch the current branch was created from
-3. **Check for existing metadata**: Look for stacked-gh metadata in parent branch commits
+3. **Check for existing metadata**: Look for gh-stacked metadata in parent branch commits
 4. **Build dependency chain**: Construct parent-pr relationships
 
 ### Detection Logic
@@ -116,7 +116,7 @@ git merge-base feature-auth-tests main
 # → Returns commit hash where feature-auth-tests diverged
 
 # Check if feature-auth has stacked metadata
-git log feature-auth --grep="stacked-gh:" -1
+git log feature-auth --grep="gh-stacked:" -1
 # → If found, feature-auth is the parent
 # → If not found, feature-auth might be root of tree
 ```

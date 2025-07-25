@@ -10,7 +10,7 @@ Embed stack metadata directly in Git commit messages:
 ```bash
 feat: add user authentication
 
-stacked-gh: pr=124 parent-pr=123
+gh-stacked: pr=124 parent-pr=123
 ```
 
 ### Annotation Strategy
@@ -38,19 +38,19 @@ stacked-gh: pr=124 parent-pr=123
 ```bash
 # First branch in dependency tree (parent is main/master)
 feat: implement user login
-stacked-gh: pr=123
+gh-stacked: pr=123
 
 # Subsequent branches
 feat: add login tests  
-stacked-gh: pr=124 parent-pr=123
+gh-stacked: pr=124 parent-pr=123
 
 feat: refactor auth flow
-stacked-gh: pr=125 parent-pr=124
+gh-stacked: pr=125 parent-pr=124
 ```
 
 ## Discovery Process
 
-1. **Scan local commits** for `stacked-gh:` metadata in all branches
+1. **Scan local commits** for `gh-stacked:` metadata in all branches
 2. **Query GitHub API** for PR details using PR numbers
 3. **Build dependency tree** from parent-pr relationships
 4. **Handle merged PRs** by detecting merge status and rebasing children onto target branch

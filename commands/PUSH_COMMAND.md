@@ -22,7 +22,7 @@ None - operates on current branch
 #### 1. Parent Detection via Git History
 - Use `git merge-base` to find where current branch diverged
 - Analyze Git history to identify parent branch
-- Check parent branch for existing stacked-gh metadata
+- Check parent branch for existing gh-stacked metadata
 - Determine parent PR number (if parent has PR)
 
 #### 2. PR Creation/Update
@@ -32,7 +32,7 @@ None - operates on current branch
 
 #### 3. Commit Annotation
 - Amend ALL commits in current branch with complete stack metadata
-- Add `stacked-gh: pr=<current-pr> parent-pr=<parent-pr>` to commit messages
+- Add `gh-stacked: pr=<current-pr> parent-pr=<parent-pr>` to commit messages
 - Include both own PR number and parent PR number for resilient tracking
 - Preserve original commit messages and structure
 
@@ -73,12 +73,12 @@ gh stacked push --force
 # Root branch commits (no parent)
 feat: add user authentication
 
-stacked-gh: pr=123
+gh-stacked: pr=123
 
 # Dependent branch commits
 test: add auth unit tests
 
-stacked-gh: pr=124 parent-pr=123
+gh-stacked: pr=124 parent-pr=123
 ```
 
 ### Why Both PR Numbers Matter
@@ -106,7 +106,7 @@ git branch --contains <divergence-commit>
 # → Find which branch contains the divergence point
 
 # Extract parent PR from parent branch commits
-git log parent-branch --grep="stacked-gh:" -1
+git log parent-branch --grep="gh-stacked:" -1
 # → Parse "pr=123" to get parent PR number
 ```
 
@@ -135,12 +135,12 @@ git log main..HEAD --reverse --format="%H"
 
 1. **Branch from main/master**: No parent-pr (root of dependency tree)
    ```bash
-   stacked-gh: pr=123
+   gh-stacked: pr=123
    ```
 
 2. **Branch from branch with metadata**: Use that branch's PR as parent
    ```bash
-   stacked-gh: pr=124 parent-pr=123
+   gh-stacked: pr=124 parent-pr=123
    ```
 
 3. **Branch from branch without metadata**: Error - parent must be pushed first
@@ -249,8 +249,8 @@ type StackMetadata struct {
 }
 
 // Example parsing
-"stacked-gh: pr=124 parent-pr=123" → {PR: 124, ParentPR: &123}
-"stacked-gh: pr=123"               → {PR: 123, ParentPR: nil}
+"gh-stacked: pr=124 parent-pr=123" → {PR: 124, ParentPR: &123}
+"gh-stacked: pr=123"               → {PR: 123, ParentPR: nil}
 ```
 
 ## Success Criteria
