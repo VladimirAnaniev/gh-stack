@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 )
 
@@ -27,7 +25,6 @@ func init() {
 }
 
 func pushStackedBranch(draft bool) error {
-	// TODO: Implement stack push logic
-	fmt.Printf("Pushing stacked branch (draft: %v)\n", draft)
+
 	return nil
 }
