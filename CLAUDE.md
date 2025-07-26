@@ -76,6 +76,14 @@ go test ./...
   - Standard library packages
 - **NO random library imports** - discuss and document any new dependencies first
 
+#### Design Principles
+- **Avoid overengineering**: Choose simple, straightforward solutions over complex ones
+- **Reuse core code**: Maximize code reuse across commands and components
+- **Low coupling**: Minimize dependencies between modules and components
+- **High cohesion**: Group related functionality together in focused modules
+- **Single responsibility**: Each interface/struct should have one clear purpose
+- **Composition over inheritance**: Prefer composition and interfaces over deep hierarchies
+
 ### Task Planning & Documentation
 
 #### Before Any Implementation
