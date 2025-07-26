@@ -21,6 +21,7 @@ None - simple command with interactive conflict resolution
 #### 1. Build Dependency Tree
 - Start from current branch
 - Find all branches that depend on current branch (directly or transitively)
+- **Special case**: When run from main, find orphaned branches (those with deleted parent references)
 - Build complete dependency tree structure
 
 #### 2. Depth-First Traversal
@@ -112,6 +113,33 @@ Please resolve these conflicts:
 
 ✅ Cascade completed successfully!
 2 branches updated and pushed.
+```
+
+### Cascade from Main (Orphaned Dependencies)
+```bash
+# After a parent branch was deleted/merged
+git checkout main
+gh stacked cascade
+
+✓ Building dependency tree from main...
+✓ Found 2 orphaned branches (missing parent references):
+  ├─ feature-auth-tests (parent feature-auth deleted)
+  └─ feature-auth-docs (parent feature-auth deleted)
+
+✓ Processing orphaned branches...
+
+[1/2] feature-auth-tests
+  ├─ Rebasing onto main... ✓
+  ├─ Updating metadata (remove parent-pr=123)... ✓
+  └─ Pushing to origin... ✓
+
+[2/2] feature-auth-docs  
+  ├─ Rebasing onto main... ✓
+  ├─ Updating metadata (remove parent-pr=123)... ✓
+  └─ Pushing to origin... ✓
+
+✅ Cascade completed successfully!
+2 orphaned branches rebased onto main.
 ```
 
 ### No Dependents Found

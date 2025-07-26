@@ -30,7 +30,7 @@ None - always operates on current branch
 
 #### 3. Merge and Cascade Cleanup
 - Merge current PR to main/master
-- Automatically trigger cleanup logic (see [CLEANUP_COMMAND.md](CLEANUP_COMMAND.md#merged-branch-with-dependents-automatic-rebase))
+- Switch to main and execute `gh stacked cascade` to handle orphaned dependents (see [CASCADE_COMMAND.md](CASCADE_COMMAND.md))
 - Rebase all dependent branches onto main/master
 - Update dependent PR base branches
 
@@ -51,21 +51,21 @@ Checking merge readiness:
 This will:
 1. Merge #123 feature-auth → main
 2. Delete feature-auth branch
-3. Rebase feature-auth-tests onto main
-4. Rebase feature-auth-cleanup onto main  
-5. Update PR base branches: feature-auth → main
+3. Switch to main and run 'gh stacked cascade'
+4. All dependent branches rebased onto main with updated PR bases
 
 ? Proceed with merge? (y/N) y
 
 ✓ Merging #123 feature-auth → main
-✓ Cleaning up feature-auth branch
-✓ Rebasing feature-auth-tests onto main
-✓ Rebasing feature-auth-cleanup onto main
-✓ Updated PR #124 base: feature-auth → main
-✓ Updated PR #126 base: feature-auth → main
+✓ Deleted feature-auth branch
+✓ Switched to main
+✓ Running cascade to rebase orphaned dependents...
+  ├─ Rebasing feature-auth-tests onto main ✓
+  └─ Rebasing feature-auth-cleanup onto main ✓
+✓ Updated PR bases: #124, #126 → main
 
 Merge completed successfully.
-1 PR merged, 2 dependent branches rebased.
+1 PR merged, 2 dependents rebased via cascade.
 ```
 
 ### Blocked Merge (Middle of Tree)

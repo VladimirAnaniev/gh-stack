@@ -100,23 +100,23 @@ Found merged PRs with dependents:
 ✓ #123 feature-auth (merged to main, has 2 dependents)
 
 This will:
-1. Rebase feature-auth-tests onto main
-2. Rebase feature-auth-docs onto main  
-3. Update PR base branches: feature-auth → main
-4. Update commit metadata (remove parent-pr=123, branches become roots)
-5. Delete merged branch 'feature-auth'
+1. Delete merged branch 'feature-auth'
+2. Switch to main
+3. Run 'gh stacked cascade' to rebase orphaned dependents
+4. All dependent branches rebased onto main with updated PR bases
 
 ? Proceed with cleanup and rebase? (y/N) y
 
-✓ Rebasing feature-auth-tests onto main...
-✓ Rebasing feature-auth-docs onto main...
-✓ Updated PR #124: base feature-auth → main, metadata updated
-✓ Updated PR #126: base feature-auth → main, metadata updated
 ✓ Deleted branch 'feature-auth'
+✓ Switched to main
+✓ Running cascade to rebase orphaned dependents...
+  ├─ Rebasing feature-auth-tests onto main ✓
+  └─ Rebasing feature-auth-docs onto main ✓
+✓ Updated PR bases: #124, #126 → main
 
-Cleanup completed. 2 branches rebased onto main, 1 branch deleted.
+Cleanup completed. 1 branch deleted, 2 dependents rebased via cascade.
 
-**Note**: If conflicts occur during rebase, uses interactive conflict resolution (see [CASCADE_COMMAND.md](CASCADE_COMMAND.md#interactive-conflict-resolution)).
+**Note**: Rebasing delegated to [CASCADE_COMMAND.md](CASCADE_COMMAND.md) for consistency.
 ```
 
 ### Safety Blocking (Open PR with Dependents)
