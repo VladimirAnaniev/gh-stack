@@ -2,8 +2,10 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/vladimir-ananiev/gh-stacked/pkg/git"
 )
 
 var branchCmd = &cobra.Command{
@@ -21,7 +23,29 @@ If run from an existing stacked branch, creates a child branch.`,
 }
 
 func createStackedBranch(branchName string) error {
-	// TODO: Implement stack branch creation
-	fmt.Printf("Creating stacked branch: %s\n", branchName)
+	// Get current working directory (repository path)
+	repoPath, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("failed to get current directory: %w", err)
+	}
+
+	// Create branch service
+	branchService := git.NewBranchService(repoPath)
+
+	// Get current branch to use as parent
+	currentBranch, err := branchService.GetCurrentBranch()
+	if err != nil {
+		return fmt.Errorf("failed to get current branch: %w", err)
+	}
+
+	fmt.Printf("Creating branch '%s' from '%s'...\n", branchName, currentBranch)
+
+	// Create the new branch
+	err = branchService.CreateBranch(branchName, currentBranch)
+	if err != nil {
+		return fmt.Errorf("failed to create branch: %w", err)
+	}
+
+	fmt.Printf("✓ Created and switched to branch '%s'\n", branchName)
 	return nil
 }
