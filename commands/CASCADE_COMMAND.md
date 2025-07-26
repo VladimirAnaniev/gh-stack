@@ -33,9 +33,10 @@ None - simple command with interactive conflict resolution
 - **Push**: `git push --force-with-lease origin <branch>`
 
 #### 4. Interactive Conflict Resolution
-- On conflict: describe the issue and block with prompt
-- Wait for user to manually resolve conflicts
+- On conflict: describe the issue and block with interactive prompt
+- Wait for user to manually resolve conflicts using standard Git workflow
 - User confirms resolution, then continue to next branch
+- **Note**: This conflict resolution pattern is reused by other commands that perform rebasing
 
 ## Examples
 
@@ -185,24 +186,12 @@ func ResolveConflicts(branch string, conflictedFiles []string) error {
 
 ## PR Metadata Updates
 
-### Detecting PR Number Changes
-```bash
-# If parent branch's PR number changed during rebase
-# Update child branch's commit messages accordingly
+Cascade preserves existing metadata during rebase operations. Metadata is only updated in specific scenarios:
 
-# Before rebase: "gh-stacked: pr=124 parent-pr=123"  
-# After parent rebase: parent PR is now 125
-# Update to: "gh-stacked: pr=124 parent-pr=125"
-```
+- **Normal cascade**: Metadata remains unchanged 
+- **Parent PR merged**: Handled by cleanup command (see [CLEANUP_COMMAND.md](CLEANUP_COMMAND.md#merged-branch-with-dependents-automatic-rebase))
 
-### Metadata Update Process
-```go
-func UpdatePRMetadata(branch *BranchNode) error {
-    // 1. Check if parent PR number changed
-    // 2. Update all commit messages in branch with new parent-pr
-    // 3. Amend commits with updated metadata
-}
-```
+For metadata annotation rules and format, see [PUSH_COMMAND.md](PUSH_COMMAND.md#commit-annotation).
 
 ## Conflict Resolution Details
 

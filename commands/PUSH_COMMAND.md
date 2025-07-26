@@ -13,7 +13,7 @@ None - operates on current branch
 
 ## Flags
 - `--draft`: Create PR as draft
-- `--force`: Force push even if conflicts exist
+- `--force`: Force push even if remote has been updated (skips safety checks)
 
 ## Behavior
 
@@ -37,7 +37,7 @@ None - operates on current branch
 - Preserve original commit messages and structure
 
 #### 4. Force Push
-- Push annotated commits to remote (force push required due to amended commits)
+- Push annotated commits to remote using `git push --force-with-lease` (required due to amended commits)
 - Update PR with dependency information
 
 ## Examples
@@ -128,8 +128,7 @@ git log main..HEAD --reverse --format="%H"
 ```
 
 ### 4. Force Push
-- Push all amended commits to remote
-- Force push is required due to commit message changes
+Uses safe force push with `--force-with-lease` (see [CASCADE_COMMAND.md](CASCADE_COMMAND.md) for force push handling details).
 
 ## Parent Resolution Rules
 

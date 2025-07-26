@@ -92,30 +92,55 @@ Status: This will close the PR and delete the local branch
 Branch abandoned successfully.
 ```
 
-### Safety Blocking (Branch with Children)
+### Merged Branch with Dependents (Automatic Rebase)
+```bash
+gh stacked cleanup --merged
+
+Found merged PRs with dependents:
+✓ #123 feature-auth (merged to main, has 2 dependents)
+
+This will:
+1. Rebase feature-auth-tests onto main
+2. Rebase feature-auth-docs onto main  
+3. Update PR base branches: feature-auth → main
+4. Update commit metadata (remove parent-pr=123, branches become roots)
+5. Delete merged branch 'feature-auth'
+
+? Proceed with cleanup and rebase? (y/N) y
+
+✓ Rebasing feature-auth-tests onto main...
+✓ Rebasing feature-auth-docs onto main...
+✓ Updated PR #124: base feature-auth → main, metadata updated
+✓ Updated PR #126: base feature-auth → main, metadata updated
+✓ Deleted branch 'feature-auth'
+
+Cleanup completed. 2 branches rebased onto main, 1 branch deleted.
+
+**Note**: If conflicts occur during rebase, uses interactive conflict resolution (see [CASCADE_COMMAND.md](CASCADE_COMMAND.md#interactive-conflict-resolution)).
+```
+
+### Safety Blocking (Open PR with Dependents)
 ```bash
 gh stacked cleanup feature-auth
 
 ❌ Cannot delete branch 'feature-auth'
 
-Reason: Branch has dependent PRs
+Reason: Branch has open PR (#123) with dependent PRs
 Dependencies:
 ├─ #124 feature-auth-tests
 └─ #126 feature-auth-docs
 
-Clean up dependent branches first, or use 'gh stacked rebase' to restructure.
+Merge or close PR #123 first, then run cleanup again.
+(Cleanup will automatically rebase dependents when parent PR is merged)
 ```
 
 ## Discovery and Safety Logic
 
-### 1. Reuse Status Discovery
-```bash
-# Use same git log discovery as status command
-git log --all --grep="gh-stacked:" --format="%H %s %D"
-
-# Parse metadata to build dependency tree
-# Query GitHub API for PR states
-```
+### 1. Discovery Phase
+Reuses discovery logic from [STATUS_COMMAND.md](STATUS_COMMAND.md#discovery-process) to:
+- Find all stacked PRs and build dependency tree
+- Query GitHub API for current PR states 
+- Map branches to PR numbers and states
 
 ### 2. Safety Checks
 ```go
@@ -127,8 +152,9 @@ type SafetyCheck struct {
 
 func CheckSafety(branchName string, tree *PRNode) SafetyCheck {
     // 1. Check if current branch
-    // 2. Check for dependent children  
-    // 3. Return safety status
+    // 2. Check for dependent children
+    // 3. Check if PR is merged (if merged with dependents, allow cleanup with rebase)
+    // 4. Return safety status
 }
 ```
 
