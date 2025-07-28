@@ -8,7 +8,7 @@ import (
 	gh "github.com/cli/go-gh/v2"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/lipgloss/tree"
-	"github.com/vladimir-ananiev/gh-stacked/pkg/git"
+	"github.com/vladimir-ananiev/gh-stack/pkg/git"
 )
 
 type PR struct {

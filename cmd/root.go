@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/vladimir-ananiev/gh-stacked/pkg/github"
-	"github.com/vladimir-ananiev/gh-stacked/pkg/git"
+	"github.com/vladimir-ananiev/gh-stack/pkg/github"
+	"github.com/vladimir-ananiev/gh-stack/pkg/git"
 )
 
 var rootCmd = &cobra.Command{
