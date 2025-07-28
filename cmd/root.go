@@ -31,7 +31,7 @@ func Execute() {
 var cascadeCmd = &cobra.Command{
 	Use:   "cascade",
 	Short: "Cascade rebase all branches in dependency order",
-	Long: `Checkout master, pull, then for each branch with PR targeting master:
+	Long: `Checkout main, pull, then for each branch with PR targeting main:
 	1. Checkout branch, rebase on target, push
 	2. For each dependent branch, checkout, rebase, push
 	
@@ -78,10 +78,10 @@ func cascadeRebase() error {
 	
 	tree := github.BuildDependencyTree(prs)
 	
-	// Checkout master and pull
-	fmt.Println("Checking out master and pulling...")
-	if err := git.CheckoutAndPull(ctx, "master"); err != nil {
-		return fmt.Errorf("failed to update master: %w", err)
+	// Checkout main and pull
+	fmt.Println("Checking out main and pulling...")
+	if err := git.CheckoutAndPull(ctx, "main"); err != nil {
+		return fmt.Errorf("failed to update main: %w", err)
 	}
 	
 	// Process tree in dependency order
