@@ -1,72 +1,38 @@
 package git
 
 import (
-	"strings"
+	"context"
+	"fmt"
+	"os"
+	"os/exec"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/vladimir-ananiev/gh-stacked/pkg/stack"
 )
 
-// BranchService handles Git branch operations
-type BranchService struct {
-	repoPath string
+type Commit struct {
+	Hash    string
+	Message string
 }
 
-// NewBranchService creates a new BranchService
-func NewBranchService(repoPath string) *BranchService {
-	return &BranchService{
-		repoPath: repoPath,
-	}
-}
-
-// CreateBranch creates a new branch from the specified parent branch and switches to it
-func (s *BranchService) CreateBranch(name, parentBranch string) error {
-	if strings.TrimSpace(name) == "" {
-		return stack.ErrInvalidBranch
-	}
-
-	repo, err := git.PlainOpen(s.repoPath)
+func getRepo() (*git.Repository, error) {
+	pwd, err := os.Getwd()
 	if err != nil {
-		return stack.ErrNotInRepository
+		return nil, fmt.Errorf("error getting current directory: %w", err)
 	}
 
-	// Check if branch already exists
-	_, err = repo.Reference(plumbing.NewBranchReferenceName(name), true)
-	if err == nil {
-		return stack.ErrBranchExists
-	}
-
-	// Get the parent branch reference
-	parentRef, err := repo.Reference(plumbing.NewBranchReferenceName(parentBranch), true)
+	repo, err := git.PlainOpenWithOptions(pwd, &git.PlainOpenOptions{DetectDotGit: true})
 	if err != nil {
-		return stack.ErrParentNotFound
+		return nil, fmt.Errorf("error opening git repository: %w", err)
 	}
-
-	// Create new branch reference
-	branchRef := plumbing.NewBranchReferenceName(name)
-	ref := plumbing.NewHashReference(branchRef, parentRef.Hash())
-	err = repo.Storer.SetReference(ref)
-	if err != nil {
-		return err
-	}
-
-	// Checkout the new branch
-	worktree, err := repo.Worktree()
-	if err != nil {
-		return err
-	}
-
-	return worktree.Checkout(&git.CheckoutOptions{
-		Branch: branchRef,
-	})
+	return repo, nil
 }
 
 // GetCurrentBranch returns the name of the currently checked out branch
-func (s *BranchService) GetCurrentBranch() (string, error) {
-	repo, err := git.PlainOpen(s.repoPath)
+func GetCurrentBranch(ctx context.Context) (string, error) {
+	repo, err := getRepo()
 	if err != nil {
-		return "", stack.ErrNotInRepository
+		return "", fmt.Errorf("not in git repository: %w", err)
 	}
 
 	head, err := repo.Head()
@@ -75,8 +41,67 @@ func (s *BranchService) GetCurrentBranch() (string, error) {
 	}
 
 	if !head.Name().IsBranch() {
-		return "", stack.ErrNotInRepository
+		return "", fmt.Errorf("not on a branch")
 	}
 
 	return head.Name().Short(), nil
+}
+
+// CheckoutBranch checks out a specific branch
+func CheckoutBranch(ctx context.Context, branch string) error {
+	repo, err := getRepo()
+	if err != nil {
+		return fmt.Errorf("not in git repository: %w", err)
+	}
+
+	worktree, err := repo.Worktree()
+	if err != nil {
+		return fmt.Errorf("failed to get worktree: %w", err)
+	}
+
+	err = worktree.Checkout(&git.CheckoutOptions{
+		Branch: plumbing.NewBranchReferenceName(branch),
+	})
+	if err != nil {
+		return fmt.Errorf("failed to checkout %s: %w", branch, err)
+	}
+
+	return nil
+}
+
+// CheckoutAndPull checks out a branch and pulls latest changes
+func CheckoutAndPull(ctx context.Context, branch string) error {
+	// First checkout the branch
+	if err := CheckoutBranch(ctx, branch); err != nil {
+		return err
+	}
+
+	// Then pull using git command
+	cmd := exec.CommandContext(ctx, "git", "pull")
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to pull %s: %w", branch, err)
+	}
+
+	return nil
+}
+
+// RebaseOnto rebases current branch onto target branch using git command
+func RebaseOnto(ctx context.Context, target string) error {
+	cmd := exec.CommandContext(ctx, "git", "rebase", target)
+	if err := cmd.Run(); err != nil {
+		fmt.Printf("⚠️  Rebase conflict detected on %s\n", target)
+		fmt.Println("   Please resolve conflicts manually and run 'git rebase --continue'")
+		fmt.Println("   Then re-run 'gh stack cascade' to continue")
+		return fmt.Errorf("rebase conflict - manual resolution needed")
+	}
+	return nil
+}
+
+// PushBranch pushes current branch to remote with force-with-lease
+func PushBranch(ctx context.Context) error {
+	cmd := exec.CommandContext(ctx, "git", "push", "--force-with-lease")
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to push branch: %w", err)
+	}
+	return nil
 }
