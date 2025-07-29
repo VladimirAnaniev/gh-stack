@@ -37,10 +37,20 @@ See the dependency tree of your open PRs:
 gh stack
 ```
 
+Example output:
+```
+Stack Status (current: feature/auth-improvements)
+
+🔄 feature/auth-improvements ← current #123 Add OAuth2 support
+├── 📝 feature/user-profiles #124 User profile management
+│   └── ✅ feature/dashboard #125 Enhanced dashboard UI
+└── ⚠️ feature/notifications #126 Real-time notifications
+```
+
 This shows:
-- Current branch (highlighted)
-- PR status indicators (draft, approved, conflicts, etc.)
-- Dependency relationships between PRs
+- Current branch (highlighted with "← current")
+- PR status indicators (🔄 ready, 📝 draft, ✅ approved, ❌ changes requested, ⚠️ conflicts)
+- Dependency relationships between PRs in a tree structure
 
 ### Cascade Rebase
 
@@ -76,11 +86,19 @@ The tool builds a dependency tree by analyzing the base and head branches of you
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes with tests
-4. Submit a pull request
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+
+## Support
+
+If you encounter any issues or have questions:
+- Check existing [issues](https://github.com/VladimirAnaniev/gh-stack/issues)
+- Create a new issue with detailed information
+- Include your OS, Go version, and GitHub CLI version
+
+## Changelog
+
+See [releases](https://github.com/VladimirAnaniev/gh-stack/releases) for version history and changes.
 
 ## License
 
-MIT License - see LICENSE file for details.
+MIT License - see [LICENSE](LICENSE) file for details.

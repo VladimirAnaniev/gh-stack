@@ -16,6 +16,7 @@ go.work
 
 # Built executable
 gh-stacked
+stack
 
 # IDE files
 .vscode/
