@@ -33,11 +33,12 @@ var (
 	numberStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("8"))
 )
 
-// GetOpenPRs gets all open PRs for the current repository
+// GetOpenPRs gets all open PRs for the current repository authored by the current user
 func GetOpenPRs(ctx context.Context) ([]*PR, error) {
 	output, _, err := gh.ExecContext(ctx, "pr", "list", 
 		"--json", "number,title,headRefName,baseRefName,state,isDraft,mergeable,reviewDecision",
-		"--state", "open")
+		"--state", "open",
+		"--author", "@me")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get PRs: %w", err)
 	}
