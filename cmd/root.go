@@ -31,7 +31,7 @@ func Execute() {
 var cascadeCmd = &cobra.Command{
 	Use:   "cascade",
 	Short: "Cascade rebase all branches in dependency order",
-	Long: `Checkout main, pull, then for each branch with PR targeting main:
+	Long: `Checkout default branch (main/master), pull, then for each branch with PR targeting the default branch:
 	1. Checkout branch, rebase on target, push
 	2. For each dependent branch, checkout, rebase, push
 	
@@ -70,6 +70,12 @@ func showStackStatus() error {
 func cascadeRebase() error {
 	ctx := context.Background()
 	
+	// Get the default branch
+	defaultBranch, err := git.GetDefaultBranch(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to get default branch: %w", err)
+	}
+	
 	// Get all open PRs and build dependency tree
 	prs, err := github.GetOpenPRs(ctx)
 	if err != nil {
@@ -78,10 +84,10 @@ func cascadeRebase() error {
 	
 	tree := github.BuildDependencyTree(prs)
 	
-	// Checkout main and pull
-	fmt.Println("Checking out main and pulling...")
-	if err := git.CheckoutAndPull(ctx, "main"); err != nil {
-		return fmt.Errorf("failed to update main: %w", err)
+	// Checkout default branch and pull
+	fmt.Printf("Checking out %s and pulling...\n", defaultBranch)
+	if err := git.CheckoutAndPull(ctx, defaultBranch); err != nil {
+		return fmt.Errorf("failed to update %s: %w", defaultBranch, err)
 	}
 	
 	// Process tree in dependency order
