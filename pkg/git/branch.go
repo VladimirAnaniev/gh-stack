@@ -2,12 +2,10 @@ package git
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
 
-	gh "github.com/cli/go-gh/v2"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 )
@@ -49,25 +47,6 @@ func GetCurrentBranch(ctx context.Context) (string, error) {
 	return head.Name().Short(), nil
 }
 
-// GetDefaultBranch returns the default branch using go-gh
-func GetDefaultBranch(ctx context.Context) (string, error) {
-	output, _, err := gh.ExecContext(ctx, "repo", "view", "--json", "defaultBranchRef")
-	if err != nil {
-		return "", fmt.Errorf("failed to get default branch: %w", err)
-	}
-	
-	var result struct {
-		DefaultBranchRef struct {
-			Name string `json:"name"`
-		} `json:"defaultBranchRef"`
-	}
-	
-	if err := json.Unmarshal(output.Bytes(), &result); err != nil {
-		return "", fmt.Errorf("failed to parse default branch response: %w", err)
-	}
-	
-	return result.DefaultBranchRef.Name, nil
-}
 
 // CheckoutBranch checks out a specific branch
 func CheckoutBranch(ctx context.Context, branch string) error {

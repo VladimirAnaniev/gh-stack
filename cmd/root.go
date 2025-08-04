@@ -6,12 +6,12 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/vladimir-ananiev/gh-stack/pkg/github"
 	"github.com/vladimir-ananiev/gh-stack/pkg/git"
+	"github.com/vladimir-ananiev/gh-stack/pkg/github"
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "stack", 
+	Use:   "stack",
 	Short: "Manage stacked pull requests",
 	Long: `A simple CLI tool for managing stacked Pull Request workflows on GitHub.
 	
@@ -47,49 +47,68 @@ func init() {
 
 func showStackStatus() error {
 	ctx := context.Background()
-	
+
 	// Get current branch
 	currentBranch, err := git.GetCurrentBranch(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to get current branch: %w", err)
 	}
-	
+
 	// Get all open PRs and build dependency tree
 	prs, err := github.GetOpenPRs(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to get open PRs: %w", err)
 	}
-	
+
 	tree := github.BuildDependencyTree(prs)
 	fmt.Printf("Stack Status (current: %s)\n\n", currentBranch)
 	github.PrintTree(tree, currentBranch)
-	
+
 	return nil
 }
 
 func cascadeRebase() error {
 	ctx := context.Background()
-	
-	// Get the default branch
-	defaultBranch, err := git.GetDefaultBranch(ctx)
+
+	// Get current branch to restore later
+	currentBranch, err := git.GetCurrentBranch(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to get default branch: %w", err)
+		return fmt.Errorf("failed to get current branch: %w", err)
 	}
-	
+
 	// Get all open PRs and build dependency tree
 	prs, err := github.GetOpenPRs(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to get open PRs: %w", err)
 	}
-	
+
 	tree := github.BuildDependencyTree(prs)
-	
-	// Checkout default branch and pull
-	fmt.Printf("Checking out %s and pulling...\n", defaultBranch)
-	if err := git.CheckoutAndPull(ctx, defaultBranch); err != nil {
-		return fmt.Errorf("failed to update %s: %w", defaultBranch, err)
+
+	// Find the tree containing the current branch
+	currentTree := github.FindCurrentBranchTree(tree, currentBranch)
+	if currentTree == nil {
+		return fmt.Errorf("current branch %s not found in any PR tree", currentBranch)
 	}
-	
-	// Process tree in dependency order
-	return github.ProcessCascadeRebase(ctx, tree)
+
+	// Get the base branch for this tree
+	baseBranch := currentTree.PR.BaseRefName
+
+	// Checkout base branch and pull
+	fmt.Printf("Checking out %s and pulling...\n", baseBranch)
+	if err := git.CheckoutAndPull(ctx, baseBranch); err != nil {
+		return fmt.Errorf("failed to update %s: %w", baseBranch, err)
+	}
+
+	// Process only the current tree in dependency order
+	if err := github.ProcessSingleTreeRebase(ctx, currentTree); err != nil {
+		return err
+	}
+
+	// Restore original branch
+	fmt.Printf("Returning to %s...\n", currentBranch)
+	if err := git.CheckoutBranch(ctx, currentBranch); err != nil {
+		return fmt.Errorf("failed to restore branch %s: %w", currentBranch, err)
+	}
+
+	return nil
 }
