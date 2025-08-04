@@ -140,11 +140,8 @@ func PrintTree(roots []*TreeNode, currentBranch string) {
 			fmt.Println()
 		}
 
-		// Print base branch without indentation
-		fmt.Println(baseBranchStyle.Render(baseBranch))
-
-		// Create tree for PRs under this base branch
-		t := tree.New()
+		// Create tree with base branch as root
+		t := tree.Root(baseBranchStyle.Render(baseBranch))
 		for _, root := range branchGroups[baseBranch] {
 			addPRNodeToTree(t, root, currentBranch)
 		}

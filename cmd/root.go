@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/charmbracelet/huh/spinner"
 	"github.com/spf13/cobra"
 	"github.com/vladimir-ananiev/gh-stack/pkg/git"
 	"github.com/vladimir-ananiev/gh-stack/pkg/github"
@@ -55,7 +56,13 @@ func showStackStatus() error {
 	}
 
 	// Get all open PRs and build dependency tree
-	prs, err := github.GetOpenPRs(ctx)
+	var prs []*github.PR
+	err = spinner.New().
+		Title("Fetching pull requests...").
+		Action(func() {
+			prs, err = github.GetOpenPRs(ctx)
+		}).
+		Run()
 	if err != nil {
 		return fmt.Errorf("failed to get open PRs: %w", err)
 	}
@@ -77,7 +84,13 @@ func cascadeRebase() error {
 	}
 
 	// Get all open PRs and build dependency tree
-	prs, err := github.GetOpenPRs(ctx)
+	var prs []*github.PR
+	err = spinner.New().
+		Title("Fetching pull requests...").
+		Action(func() {
+			prs, err = github.GetOpenPRs(ctx)
+		}).
+		Run()
 	if err != nil {
 		return fmt.Errorf("failed to get open PRs: %w", err)
 	}
@@ -94,19 +107,35 @@ func cascadeRebase() error {
 	baseBranch := currentTree.PR.BaseRefName
 
 	// Checkout base branch and pull
-	fmt.Printf("Checking out %s and pulling...\n", baseBranch)
-	if err := git.CheckoutAndPull(ctx, baseBranch); err != nil {
+	err = spinner.New().
+		Title(fmt.Sprintf("Updating %s...", baseBranch)).
+		Action(func() {
+			err = git.CheckoutAndPull(ctx, baseBranch)
+		}).
+		Run()
+	if err != nil {
 		return fmt.Errorf("failed to update %s: %w", baseBranch, err)
 	}
 
 	// Process only the current tree in dependency order
-	if err := github.ProcessSingleTreeRebase(ctx, currentTree); err != nil {
+	err = spinner.New().
+		Title("Rebasing PR stack...").
+		Action(func() {
+			err = github.ProcessSingleTreeRebase(ctx, currentTree)
+		}).
+		Run()
+	if err != nil {
 		return err
 	}
 
 	// Restore original branch
-	fmt.Printf("Returning to %s...\n", currentBranch)
-	if err := git.CheckoutBranch(ctx, currentBranch); err != nil {
+	err = spinner.New().
+		Title(fmt.Sprintf("Returning to %s...", currentBranch)).
+		Action(func() {
+			err = git.CheckoutBranch(ctx, currentBranch)
+		}).
+		Run()
+	if err != nil {
 		return fmt.Errorf("failed to restore branch %s: %w", currentBranch, err)
 	}
 
