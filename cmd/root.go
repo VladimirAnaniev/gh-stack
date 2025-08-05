@@ -6,9 +6,16 @@ import (
 	"os"
 
 	"github.com/charmbracelet/huh/spinner"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
 	"github.com/vladimir-ananiev/gh-stack/pkg/git"
 	"github.com/vladimir-ananiev/gh-stack/pkg/github"
+)
+
+var (
+	errorStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("9")).Bold(true)
+	warningStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("11")).Bold(true)
+	hintStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("8")).Italic(true)
 )
 
 var rootCmd = &cobra.Command{
@@ -99,7 +106,12 @@ func cascadeRebase() error {
 	// Find the tree containing the current branch
 	currentTree := github.FindCurrentBranchTree(tree, currentBranch)
 	if currentTree == nil {
-		return fmt.Errorf("current branch %s not found in any PR tree", currentBranch)
+		fmt.Printf("%s %s has no open PR or is not part of a PR stack\n\n", 
+			errorStyle.Render("✗ Error:"), 
+			warningStyle.Render(currentBranch))
+		fmt.Printf("%s Switch to a branch that has an open PR to use cascade\n", 
+			hintStyle.Render("Hint:"))
+		return nil // Return nil to prevent cobra from showing the error again
 	}
 
 	// Get the base branch for this tree
@@ -118,7 +130,7 @@ func cascadeRebase() error {
 
 	// Process only the current tree in dependency order
 	err = spinner.New().
-		Title("Rebasing PR stack...").
+		Title(fmt.Sprintf("Rebasing %s → %s...", currentTree.PR.HeadRefName, currentTree.PR.BaseRefName)).
 		Action(func() {
 			err = github.ProcessSingleTreeRebase(ctx, currentTree)
 		}).

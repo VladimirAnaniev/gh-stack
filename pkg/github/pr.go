@@ -39,6 +39,11 @@ var (
 	currentStyle    = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("11"))
 	numberStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("8"))
 	treeStyle       = lipgloss.NewStyle().Padding(1, 0)
+	
+	// Cascade operation styles
+	processingStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("11")).Bold(true)
+	completedStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("10")).Bold(true)
+	arrowStyle      = lipgloss.NewStyle().Foreground(lipgloss.Color("8"))
 )
 
 // GetOpenPRs gets all open PRs for the current repository authored by the current user
@@ -237,10 +242,6 @@ func ProcessSingleTreeRebase(ctx context.Context, root *TreeNode) error {
 }
 
 func processNodeRebase(ctx context.Context, node *TreeNode) error {
-	fmt.Printf("🔄 Processing %s -> %s...\n",
-		branchStyle.Render(node.PR.HeadRefName),
-		branchStyle.Render(node.PR.BaseRefName))
-
 	if err := git.CheckoutBranch(ctx, node.PR.HeadRefName); err != nil {
 		return fmt.Errorf("failed to checkout %s: %w", node.PR.HeadRefName, err)
 	}
@@ -253,7 +254,9 @@ func processNodeRebase(ctx context.Context, node *TreeNode) error {
 		return fmt.Errorf("failed to push %s: %w", node.PR.HeadRefName, err)
 	}
 
-	fmt.Printf("✅ Completed %s\n", branchStyle.Render(node.PR.HeadRefName))
+	fmt.Printf("%s %s\n",
+		completedStyle.Render("✅ Completed"),
+		branchStyle.Render(node.PR.HeadRefName))
 
 	for _, child := range node.Children {
 		if err := processNodeRebase(ctx, child); err != nil {
