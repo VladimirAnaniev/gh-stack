@@ -38,6 +38,7 @@ var (
 	baseBranchStyle = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("12"))
 	currentStyle    = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("11"))
 	numberStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("8"))
+	treeStyle       = lipgloss.NewStyle().Padding(1, 0)
 )
 
 // GetOpenPRs gets all open PRs for the current repository authored by the current user
@@ -141,12 +142,19 @@ func PrintTree(roots []*TreeNode, currentBranch string) {
 		}
 
 		// Create tree with base branch as root
-		t := tree.Root(baseBranchStyle.Render(baseBranch))
+		baseBranchText := baseBranch
+		if baseBranch == currentBranch {
+			baseBranchText = baseBranch + " ← current"
+			baseBranchText = currentStyle.Render(baseBranchText)
+		} else {
+			baseBranchText = baseBranchStyle.Render(baseBranch)
+		}
+		t := tree.Root(baseBranchText)
 		for _, root := range branchGroups[baseBranch] {
 			addPRNodeToTree(t, root, currentBranch)
 		}
 
-		fmt.Println(t)
+		fmt.Println(treeStyle.Render(t.String()))
 	}
 }
 

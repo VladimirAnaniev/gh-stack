@@ -68,7 +68,6 @@ func showStackStatus() error {
 	}
 
 	tree := github.BuildDependencyTree(prs)
-	fmt.Printf("Stack Status (current: %s)\n\n", currentBranch)
 	github.PrintTree(tree, currentBranch)
 
 	return nil
